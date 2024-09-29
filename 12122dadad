@@ -1,0 +1,67 @@
+-- Variables
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local userInputService = game:GetService("UserInputService")
+local flying = false
+local flySpeed = 50 -- Adjust speed of flying
+
+-- Function to start flying
+local function startFlying()
+    flying = true
+    local bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    bodyVelocity.MaxForce = Vector3.new(4000, 4000, 4000) -- Max force to apply
+    bodyVelocity.Parent = character.HumanoidRootPart
+
+    -- Fly loop
+    while flying do
+        -- Get the player's camera direction
+        local cameraDirection = workspace.CurrentCamera.CFrame.LookVector
+        local moveDirection = Vector3.new(0, 0, 0)
+
+        -- Controls for flying
+        if userInputService:IsKeyDown(Enum.KeyCode.W) then
+            moveDirection = moveDirection + cameraDirection
+        end
+        if userInputService:IsKeyDown(Enum.KeyCode.S) then
+            moveDirection = moveDirection - cameraDirection
+        end
+        if userInputService:IsKeyDown(Enum.KeyCode.A) then
+            moveDirection = moveDirection - cameraDirection:Cross(Vector3.new(0, 1, 0))
+        end
+        if userInputService:IsKeyDown(Enum.KeyCode.D) then
+            moveDirection = moveDirection + cameraDirection:Cross(Vector3.new(0, 1, 0))
+        end
+        if userInputService:IsKeyDown(Enum.KeyCode.Space) then
+            bodyVelocity.Velocity = Vector3.new(moveDirection.X, flySpeed, moveDirection.Z) -- Upward velocity
+        elseif userInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+            bodyVelocity.Velocity = Vector3.new(moveDirection.X, -flySpeed, moveDirection.Z) -- Downward velocity
+        else
+            bodyVelocity.Velocity = Vector3.new(moveDirection.X, 0, moveDirection.Z) -- No upward/downward movement
+        end
+
+        wait(0.1) -- Loop delay
+    end
+
+    bodyVelocity:Destroy() -- Clean up BodyVelocity when flying stops
+end
+
+-- Function to toggle flying on/off
+userInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if not gameProcessedEvent then
+        if input.KeyCode == Enum.KeyCode.F then
+            flying = not flying -- Toggle flying
+            if flying then
+                startFlying()
+            end
+        end
+    end
+end)
+
+-- Stop flying when the player dies
+player.CharacterAdded:Connect(function(newCharacter)
+    if flying then
+        flying = false -- Stop flying
+    end
+    character = newCharacter
+end)
