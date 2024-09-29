@@ -1,0 +1,37 @@
+-- Fast Auto Clicker Script
+local userInputService = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
+
+local autoClickEnabled = false
+local clickSpeed = 0.01 -- Adjust this value for faster or slower clicking
+
+-- Function to perform clicking
+local function autoClick()
+    while autoClickEnabled do
+        wait(clickSpeed) -- Adjust click speed
+        -- Simulate mouse click
+        local mouse = player:GetMouse()
+        local target = mouse.Target
+
+        if target and target:IsA("Part") then
+            fireclickdetector(target:FindFirstChild("ClickDetector")) -- Click the target if it has a ClickDetector
+        end
+    end
+end
+
+-- Toggle auto-clicking with "M"
+userInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if not gameProcessedEvent then
+        if input.KeyCode == Enum.KeyCode.M then
+            autoClickEnabled = not autoClickEnabled
+            if autoClickEnabled then
+                autoClick() -- Start auto-clicking
+            end
+        end
+    end
+end)
+
+-- Stop auto-clicking when the player dies
+game.Players.LocalPlayer.CharacterAdded:Connect(function()
+    autoClickEnabled = false -- Stop auto-clicking
+end)
