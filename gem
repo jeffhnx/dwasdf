@@ -1,0 +1,77 @@
+-- Gem Duplication Script
+
+-- Function to duplicate gems
+function duplicateGems(originalGem, amount)
+    for i = 1, amount do
+        -- Clone the original gem
+        local duplicatedGem = originalGem:Clone()  
+        
+        -- Adjust the position to prevent overlap
+        duplicatedGem.Position = originalGem.Position + Vector3.new(i, 0, 0)  -- Change this to avoid overlap
+
+        -- Parent the duplicated gem to the workspace or the gems collection
+        duplicatedGem.Parent = game.Workspace.Gems  -- Change this path as necessary
+
+        -- Set properties for the duplicated gem
+        duplicatedGem.Name = originalGem.Name  
+    end
+end
+
+-- Function to trigger gem duplication based on input
+function triggerGemDuplication(amount)
+    local player = game.Players.LocalPlayer
+    local gems = player.Backpack:GetChildren()  -- Assuming gems are stored in the player's backpack
+
+    for _, gem in pairs(gems) do
+        if gem:IsA("Gem") then  -- Check if the item is a gem
+            duplicateGems(gem, amount)
+        end
+    end
+end
+
+-- Create a GUI for duplicating gems
+local screenGui = Instance.new("ScreenGui")
+local frame = Instance.new("Frame")
+local duplicateButton = Instance.new("TextButton")
+local inputBox = Instance.new("TextBox")
+local label = Instance.new("TextLabel")
+
+-- Frame properties
+frame.Size = UDim2.new(0.25, 0, 0.25, 0)
+frame.Position = UDim2.new(0.5, -125, 0.5, -125)
+frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+frame.Parent = screenGui
+
+-- Label properties
+label.Size = UDim2.new(1, 0, 0.2, 0)
+label.Position = UDim2.new(0, 0, 0, 0)
+label.Text = "Enter Number of Gems to Duplicate:"
+label.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+label.Parent = frame
+
+-- Input Box properties
+inputBox.Size = UDim2.new(1, 0, 0.2, 0)
+inputBox.Position = UDim2.new(0, 0, 0.2, 0)
+inputBox.PlaceholderText = "Amount"
+inputBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+inputBox.Parent = frame
+
+-- Duplicate Button properties
+duplicateButton.Size = UDim2.new(1, 0, 0.4, 0)
+duplicateButton.Position = UDim2.new(0, 0, 0.5, 0)
+duplicateButton.Text = "Duplicate Gems"
+duplicateButton.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
+duplicateButton.Parent = frame
+
+-- Connect button to duplication function
+duplicateButton.MouseButton1Click:Connect(function()
+    local amount = tonumber(inputBox.Text)  -- Convert input to a number
+    if amount and amount > 0 then  -- Check if the amount is valid
+        triggerGemDuplication(amount)
+    else
+        warn("Please enter a valid number greater than 0.")  -- Notify if input is invalid
+    end
+end)
+
+-- Parent the GUI to the player's PlayerGui
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
